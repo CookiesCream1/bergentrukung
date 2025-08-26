@@ -1,24 +1,68 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import useCart from '@/data/cart'
 const { getItems: items, getTotal: total, clear } = useCart()
-const cfg = useRuntimeConfig()
-const stripe = await useClientStripe().loadStripe(cfg.public.stripe.key)
-const checkout = async () => {
-  const { clientSecret, error } = await $fetch(
-    '/api/public/createPaymentIntent',
-    { query: { amount: Math.floor(total() * 100), currency: 'czk' } }
-  )
-  if (error) {
-    console.error(error)
+const { stripe } = useClientStripe()
+let ClientSecret: string | undefined
+const showOverrideButton = ref(false) // Controls override button visibility
+
+const checkout = () => {
+  showOverrideButton.value = true // Show override button after checko
+  if (ClientSecret === undefined) {
     return
   }
-  if (clientSecret === undefined) {
-    return
-  }
-  stripe?.redirectToCheckout({
-    successUrl: '/cart/edit',
-    cancelUrl: '/'
+  stripe.value.confirmPayment({
+    clientSecret: ClientSecret,
+    confirmParams: {
+      return_url: 'https://www.google.com/'
+    }
   })
+}
+
+watch(
+  stripe,
+  async () => {
+    if (stripe.value) {
+      const { clientSecret, error } = await $fetch(
+        '/api/public/createPaymentIntent',
+        { query: { amount: Math.floor(total() * 100), currency: 'czk' } }
+      )
+
+      if (error) {
+        console.error(error)
+        return
+      }
+      if (clientSecret !== null) {
+        ClientSecret = clientSecret
+      }
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
+const override = async () => {
+  try {
+    const response = await $fetch('/api/public/checkout', {
+      method: 'POST',
+      body: {
+        total_price: total(),
+        product_arr: items().map(v => ({
+          product_id: v.product_id,
+          price: v.price,
+          count: v.count
+        }))
+      }
+    })
+
+    const { saleId } = response
+
+    clear()
+    await navigateTo({ path: '/cart/edit', query: { sale_id: saleId } })
+  } catch (error) {
+    console.error('Checkout failed:', error)
+  }
 }
 </script>
 
@@ -48,9 +92,18 @@ const checkout = async () => {
       <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="clear()">
         clear cart
       </UButton>
-      <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="checkout">
+      <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="navigateTo('/payment')">
         checkout
       </UButton>
     </div>
+
+    <!-- shazam, a cunt appears! -->
+    <div v-if="showOverrideButton" class="flex justify-end mt-4">
+      <UButton class="px-2 py-1 bg-red-500 text-white rounded-md" @click="override">
+        override
+      </UButton>
+    </div>
+
+    <div id="linkAuthenticationElement" />
   </div>
 </template>

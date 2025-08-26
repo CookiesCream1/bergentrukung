@@ -1,85 +1,119 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
 
 const user = useAuthState()
-const { signOut } = useAuth()
 const { data: role } = await useFetch('/api/user/role')
+const { signOut } = useAuth()
 
-// Search logic
-const searchQuery = ref('')
-const router = useRouter()
+// Prop for v-model binding
+defineProps({
+  modelValue: String
+})
+const emit = defineEmits(['update:modelValue'])
 
-function onSearch (e: Event) {
-  e.preventDefault()
-  if (!searchQuery.value.trim()) { return }
-  // Navigate to search page with query param
-  router.push(`/search?query=${encodeURIComponent(searchQuery.value)}`)
-}
+// Local search state
+const searchInput = ref('')
+
+// Keep parent v-model in sync
+watch(searchInput, val => emit('update:modelValue', val))
 </script>
 
 <template>
-  <div class="mainmenu">
-    <NuxtLink to="/">
-      home
+  <div class="topbar">
+    <NuxtLink to="/" class="link">
+      Home
     </NuxtLink>
 
-    <!-- Search form -->
-    <form style="display: flex; align-items: center;" @submit="onSearch">
+    <div class="search-wrapper">
       <input
         id="search"
-        v-model="searchQuery"
+        v-model="searchInput"
         type="text"
-        name="search"
         placeholder="Search products..."
       >
-      <button type="submit">
-        🔍
-      </button>
-    </form>
+    </div>
 
-    <NuxtLink to="/admin/users">
-      admin
+    <NuxtLink to="/admin/users" class="link">
+      Admin
     </NuxtLink>
 
     <NuxtLink
-      v-if="user.status.value === 'authenticated' && role.value === 'admin'"
+      v-if="user.status.value === 'authenticated' && role === 'admin'"
       to="/admin/itemdashboard"
+      class="link"
     >
-      product dashboard
+      Product Dashboard
     </NuxtLink>
 
-    <NuxtLink to="/cart">
+    <NuxtLink to="/cart" class="link">
       Cart
     </NuxtLink>
 
-    <NuxtLink v-if="user.status.value !== 'authenticated'" to="/login">
-      not logged in
-    </NuxtLink>
-
-    <button v-else style="color: white" @click="signOut()">
-      user: {{ user.data.value?.user?.name ?? "No Name" }}
-    </button>
+    <div v-if="user.status.value !== 'authenticated'">
+      <NuxtLink to="/login" class="link">
+        Not Logged In
+      </NuxtLink>
+    </div>
+    <div v-else>
+      <button class="user-btn" @click="signOut()">
+        {{ user.data.value?.user?.name ?? "No Name" }}
+      </button>
+    </div>
   </div>
 </template>
 
-<style>
-.mainmenu {
-  box-sizing: border-box;
+<style scoped>
+.topbar {
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  background-color: #000;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
   height: 4rem;
-  padding: 1rem;
-  color: antiquewhite;
+  background-color: #111111;
+  color: #f0f0f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-family: Arial, sans-serif;
 }
-input[type="text"] {
-  padding: 0.5rem;
+
+.link {
+  color: #f0f0f0;
+  text-decoration: none;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #ffcc00;
+}
+
+.search-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+input#search {
+  width: 60%;
+  max-width: 300px;
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
-  margin-right: 0.5rem;
+  border: none;
+  outline: none;
+  font-size: 1rem;
 }
-button {
+
+.user-btn {
+  background-color: #333;
+  border: none;
   padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-btn:hover {
+  background-color: #555;
 }
 </style>
