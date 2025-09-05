@@ -50,9 +50,11 @@ const randomImg = pickRandomImage()
     <div class="starfix">
       <NuxtRating :read-only="true" :rating-value="rating" />
     </div>
-    <p>{{ description }}</p>
+    <p style="font-size: small;">
+      {{ description }}
+    </p>
     <div class="priceContainer">
-      <div style="font-size: 2em; line-height: 2rem">
+      <div style="font-size: 2em; line-height: 2rem; padding-bottom: 5%;">
         {{ Math.floor(price) }}
       </div>
       <div>
@@ -62,13 +64,13 @@ const randomImg = pickRandomImage()
     </div>
     <div
       class="px-2 py-1 bg-gray-200 rounded-md w-full flex justify-end bottom-0 right-0"
-      style="background-color: antiquewhite; margin-bottom: 10px;"
+      style="background-color: antiquewhite; margin-bottom: 10px; display:flex; align-self: bottom;"
     >
       <UButton
         class="px-2 py-1 bg-gray-200 rounded-md"
         @click="cart.addItem({ product_id: productId, product_name: productName, price }, 1)"
       >
-        buy
+        Koupit
       </UButton>
     </div>
   </div>

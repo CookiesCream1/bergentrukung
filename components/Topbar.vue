@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const user = useAuthState()
 const { data: role } = await useFetch('/api/user/role')
@@ -13,15 +13,34 @@ const emit = defineEmits(['update:modelValue'])
 
 // Local search state
 const searchInput = ref('')
-
-// Keep parent v-model in sync
 watch(searchInput, val => emit('update:modelValue', val))
+
+// Dropdown state
+const demoOpen = ref(false)
+function toggleDemo () {
+  demoOpen.value = !demoOpen.value
+}
+
+// Click outside handler
+function handleClickOutside (e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('.demo-dropdown')) {
+    demoOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
   <div class="topbar">
     <NuxtLink to="/" class="link">
-      Home
+      Domů
     </NuxtLink>
 
     <div class="search-wrapper">
@@ -29,11 +48,15 @@ watch(searchInput, val => emit('update:modelValue', val))
         id="search"
         v-model="searchInput"
         type="text"
-        placeholder="Search products..."
+        placeholder="Vyhledávej"
       >
     </div>
 
-    <NuxtLink to="/admin/users" class="link">
+    <NuxtLink
+      v-if="user.status.value === 'authenticated' && role === 'admin'"
+      to="/admin/users"
+      class="link"
+    >
       Admin
     </NuxtLink>
 
@@ -42,16 +65,59 @@ watch(searchInput, val => emit('update:modelValue', val))
       to="/admin/itemdashboard"
       class="link"
     >
-      Product Dashboard
+      Produkty
     </NuxtLink>
 
+    <!-- DEMO dropdown -->
+    <div
+      v-if="user.status.value === 'authenticated' && role === 'admin'"
+      class="relative demo-dropdown"
+    >
+      <button class="link flex items-center" @click="toggleDemo">
+        DEMO
+        <svg
+          class="ml-1 w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      <div
+        v-if="demoOpen"
+        class="absolute mt-2 bg-[#222] border border-gray-700 rounded-md shadow-lg z-50"
+      >
+        <NuxtLink
+          to="/indexdemo"
+          class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+          @click="demoOpen = false"
+        >
+          Demo stránka
+        </NuxtLink>
+        <NuxtLink
+          to="/indexdemonight"
+          class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+          @click="demoOpen = false"
+        >
+          Demo stránka (nightmode)
+        </NuxtLink>
+      </div>
+    </div>
+
     <NuxtLink to="/cart" class="link">
-      Cart
+      Košík
     </NuxtLink>
 
     <div v-if="user.status.value !== 'authenticated'">
       <NuxtLink to="/login" class="link">
-        Not Logged In
+        Nepřihlášen
       </NuxtLink>
     </div>
     <div v-else>

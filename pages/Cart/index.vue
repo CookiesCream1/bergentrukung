@@ -92,7 +92,7 @@ const override = async () => {
       <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="clear()">
         clear cart
       </UButton>
-      <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="navigateTo('/payment')">
+      <UButton class="px-2 py-1 bg-gray-200 rounded-md" @click="navigateTo('Cart/pay')">
         checkout
       </UButton>
     </div>
