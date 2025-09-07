@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useCart from '@/data/cart'
+import { ref } from 'vue'
 
 defineProps<{
   productId: number
@@ -9,8 +9,6 @@ defineProps<{
   rating: number
 }>()
 
-const cart = useCart()
-
 // Hardcoded list of image filenames (from public/img/)
 const imageFiles = [
   '1d0877fbfab4d58dbbfe58bf5a54207a',
@@ -18,43 +16,30 @@ const imageFiles = [
   '5bd6e815c7daf654e118cc82f80be80a',
   '5f06db0dd6a8067338fbfa3fa6ae6676',
   '8e494f394f50ee3877c607c90b65312c',
-  '80ba153dab6f568579fbda44d7bf7b78',
-  '83aa1734a1a1303d2b0f1153baabd259',
-  '5763bba08e0142329fe8fcfe7d389590',
-  '338797d618ac97d97bb693e48cb3af9e',
-  '5114511630033b851b078ce496979c92',
-  'c686ac45baf0676ab66df99310fa0ff6',
-  'cd0d37cdd70dfdecd6ba613323a8ca73',
-  'faaeec62a40d3de50f95fe420405adde'
+  '80ba153dab6f568579fbda44d7bf7b78'
 ]
 
-// Function to pick a random image for this instance
-function pickRandomImage () {
-  return imageFiles[Math.floor(Math.random() * imageFiles.length)]
-}
-
-// Each component instance gets its own random image
-const randomImg = pickRandomImage()
+const randomImg = imageFiles[Math.floor(Math.random() * imageFiles.length)]
 </script>
 
 <template>
-  <div class="boundingbox">
+  <NuxtLink :to="`/product/${productId}`" class="boundingbox">
     <img
       :src="`/img/${randomImg}.jpg`"
       class="product-image"
       alt="Product image"
     >
-    <h3 style="padding-left: 5%">
+    <h3 class="mt-2 px-2 text-lg font-semibold text-gray-100">
       {{ productName }}
     </h3>
-    <div class="starfix">
+    <div class="starfix mt-1 px-2">
       <NuxtRating :read-only="true" :rating-value="rating" />
     </div>
-    <p style="font-size: small;">
+    <p class="px-2 text-sm text-gray-300 mt-1">
       {{ description }}
     </p>
-    <div class="priceContainer">
-      <div style="font-size: 2em; line-height: 2rem; padding-bottom: 5%;">
+    <div class="priceContainer px-2 mt-2">
+      <div style="font-size: 2em; line-height: 2rem;">
         {{ Math.floor(price) }}
       </div>
       <div>
@@ -62,28 +47,23 @@ const randomImg = pickRandomImage()
       </div>
       <div>CZK</div>
     </div>
-    <div
-      class="px-2 py-1 bg-gray-200 rounded-md w-full flex justify-end bottom-0 right-0"
-      style="background-color: antiquewhite; margin-bottom: 10px; display:flex; align-self: bottom;"
-    >
-      <UButton
-        class="px-2 py-1 bg-gray-200 rounded-md"
-        @click="cart.addItem({ product_id: productId, product_name: productName, price }, 1)"
-      >
-        Koupit
-      </UButton>
-    </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <style scoped>
 .boundingbox {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  background-color: #1f2937;
+  padding: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+}
+.boundingbox:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .product-image {
