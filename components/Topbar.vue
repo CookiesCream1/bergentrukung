@@ -40,7 +40,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="topbar">
     <NuxtLink to="/" class="link">
-      Domů
+      <h1 class="text-2xl font-bold text-emerald-600">
+        Zamazon
+      </h1>
     </NuxtLink>
 
     <div class="search-wrapper">
@@ -135,7 +137,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   padding: 0 1.5rem;
   height: 4rem;
-  background-color: #111111;
+  background-color: #1f2937;
   color: #f0f0f0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   font-family: Arial, sans-serif;

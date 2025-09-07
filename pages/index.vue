@@ -1,124 +1,100 @@
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import Topbar from '~/components/Topbar.vue'
-import Categories from '~/components/Categories.vue'
-import ProductSquare from '~/components/ProductSquare.vue'
-
-definePageMeta({
-  auth: false
-})
-
-// SEARCH state
-const search = ref('')
-
-// Fetch categories and products safely
-const { data: categoriesData, pending: categoriesPending, error: categoriesError } = useFetch('/api/public/category', { initialCache: false })
-const { data: productsData, pending: productsPending, error: productsError } = useFetch('/api/public/products', { initialCache: false })
-
-// Computed reactive filtered products (always return an array)
-const filteredProducts = computed(() => {
-  const products = productsData.value ?? []
-  if (!search.value) { return products }
-  return products.filter(product =>
-    product?.productName?.toLowerCase().includes(search.value.toLowerCase())
-  )
-})
-
-// Computed categories array (unwrap API object)
-const categories = computed(() => {
-  if (!categoriesData.value) { return [] }
-  return categoriesData.value.categories ?? []
-})
-</script>
-
 <template>
-  <div class="toplevel">
-    <Topbar v-model="search" class="topbar" />
+  <div class="min-h-screen bg-gray-900 text-gray-100">
+    <!-- Topbar -->
+    <header class="bg-gray-800 shadow">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-emerald-400">
+          Zamazon
+        </h1>
+        <nav class="space-x-6">
+          <NuxtLink to="/shop" class="hover:text-emerald-400">
+            Produkty
+          </NuxtLink>
+          <a href="#o-nas" class="hover:text-emerald-400">O nás</a>
+          <a href="#kontakt" class="hover:text-emerald-400">Kontakt</a>
+        </nav>
+      </div>
+    </header>
 
-    <div class="sidebar">
-      <template v-if="categoriesPending">
-        Loading categories...
-      </template>
-      <template v-else-if="categoriesError">
-        Failed to load categories
-      </template>
-      <template v-else>
-        <Categories
-          v-for="category in categories"
-          :key="category?.name || category?.id"
-          v-bind="category"
-        />
-      </template>
-    </div>
+    <main>
+      <!-- Hero Image -->
+      <img src="public/img/indexdemoalt.jpg" width="95%" style="padding-left: 5%;">
 
-    <div class="main">
-      <template v-if="productsPending">
-        Loading products...
-      </template>
-      <template v-else-if="productsError">
-        Failed to load products
-      </template>
-      <template v-else-if="(filteredProducts?.length ?? 0) === 0">
-        No products found.
-      </template>
-      <template v-else>
-        <ProductSquare
-          v-for="product in filteredProducts"
-          :key="product?.productId || product?.name"
-          v-bind="product"
-        />
-      </template>
-    </div>
+      <!-- Hero Section -->
+      <section class="bg-gray-800 py-20 text-center">
+        <h2 class="text-4xl font-bold mb-4 text-emerald-400">
+          Váš nový styl začíná zde
+        </h2>
+        <p class="text-lg mb-6 text-gray-300">
+          Nakupujte moderní oblečení za skvělé ceny, rychle a pohodlně.
+        </p>
+        <NuxtLink
+          to="/shop"
+          class="bg-emerald-500 text-white px-6 py-3 rounded-lg shadow hover:bg-emerald-600"
+        >
+          Prohlédnout kolekci
+        </NuxtLink>
+      </section>
+
+      <!-- About -->
+      <section id="o-nas" class="bg-gray-700 py-16">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+          <h3 class="text-3xl font-semibold mb-6 text-emerald-300">
+            O nás
+          </h3>
+          <p class="text-lg text-gray-300">
+            Zamazon je český internetový obchod s oblečením.<br>
+            Nabízíme moderní a pohodlné kousky pro každého.<br>
+            Rychlé doručení, snadné vrácení a rychlé odpovědi!
+          </p>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="kontakt" class="max-w-4xl mx-auto px-4 py-16 text-center">
+        <h3 class="text-3xl font-semibold mb-6 text-emerald-300">
+          Kontaktujte nás
+        </h3>
+        <p class="text-lg mb-4 text-gray-300">
+          Máte otázky? Jsme tu pro vás.
+        </p>
+        <a href="mailto:info@zamazon.cz" class="text-emerald-400 font-medium hover:text-emerald-300">
+          info@zamazon.cz
+        </a>
+      </section>
+
+      <!-- Terms & Policies -->
+      <section id="podminky" class="bg-gray-800 py-16 text-center">
+        <div class="max-w-4xl mx-auto px-4">
+          <h3 class="text-3xl font-semibold mb-6 text-emerald-300">
+            Obchodní a dodací podmínky
+          </h3>
+          <p class="text-lg text-gray-300 mb-6">
+            Zakoupením produktů souhlasíte s našimi obchodními a dodacími podmínkami.
+            Dodání obvykle probíhá do 2–5 pracovních dnů. Zákazník má právo na vrácení
+            zboží do 14 dnů od převzetí.
+          </p>
+
+          <h4 class="text-xl font-semibold mb-4 text-emerald-400">
+            Reklamační řád
+          </h4>
+          <p class="text-lg text-gray-300">
+            Na všechny produkty se vztahuje zákonná záruka. V případě vad nás prosím
+            kontaktujte na <a href="mailto:info@zamazon.cz" class="text-emerald-400 hover:text-emerald-300">info@zamazon.cz</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 text-gray-400 py-6 text-center space-y-2">
+      <p>&copy; 2025 Zamazon. Všechna práva vyhrazena.</p>
+      <nav class="space-x-4 text-sm">
+        <a href="#podminky" class="hover:text-emerald-400">Obchodní podmínky</a>
+        <a href="#podminky" class="hover:text-emerald-400">Dodací podmínky</a>
+        <a href="#podminky" class="hover:text-emerald-400">Reklamační řád</a>
+        <a href="#kontakt" class="hover:text-emerald-400">Kontakty</a>
+      </nav>
+    </footer>
   </div>
 </template>
-
-<style scoped>
-.toplevel {
-  display: grid;
-  grid-template-columns: 1fr 4fr;
-  grid-template-rows: auto 1fr;
-  grid-template-areas:
-    "topbar topbar"
-    "sidebar main";
-  gap: 1rem;
-  height: 100vh;
-}
-
-.topbar {
-  grid-area: topbar;
-}
-
-.sidebar {
-  grid-area: sidebar;
-  padding: 1rem;
-  width: 16rem;
-  overflow-y: auto;
-}
-
-.main {
-  grid-area: main;
-  padding: 1rem;
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
-  justify-content: start;
-}
-
-/* Make all ProductSquares consistent size */
-.main > * {
-  width: 256px;
-  height: 400px; /* adjust as needed */
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Optional: make images scale nicely */
-.main > * img {
-  object-fit: cover;
-  width: 100%;
-  height: 200px;
-  border-radius: 4px;
-}
-</style>

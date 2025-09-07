@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import useCart from '@/data/cart'
 
 const { getTotal: total, clear } = useCart()
@@ -8,7 +8,9 @@ const { stripe } = useClientStripe()
 let ClientSecret: string | undefined
 const processing = ref(false)
 const errorMessage = ref<string | null>(null)
+let elements: any = null
 
+// Load payment intent + setup Stripe elements
 watch(
   stripe,
   async () => {
@@ -24,8 +26,13 @@ watch(
           errorMessage.value = error.message ?? 'Failed to create payment intent.'
           return
         }
+
         if (clientSecret) {
           ClientSecret = clientSecret
+          // Create elements only once
+          elements = stripe.value.elements({ clientSecret })
+          const paymentElement = elements.create('payment')
+          paymentElement.mount('#payment-element')
         }
       } catch (err: any) {
         console.error(err)
@@ -37,7 +44,7 @@ watch(
 )
 
 const payNow = async () => {
-  if (!ClientSecret || !stripe.value) {
+  if (!ClientSecret || !stripe.value || !elements) {
     errorMessage.value = 'Stripe not ready yet. Try again in a moment.'
     return
   }
@@ -46,12 +53,17 @@ const payNow = async () => {
     processing.value = true
     errorMessage.value = null
 
-    await stripe.value.confirmPayment({
-      clientSecret: ClientSecret,
+    const result = await stripe.value.confirmPayment({
+      elements,
       confirmParams: {
         return_url: window.location.origin + '/cart/edit'
       }
     })
+
+    if (result.error) {
+      console.error(result.error)
+      errorMessage.value = result.error.message ?? 'Payment failed. Please try again.'
+    }
   } catch (err: any) {
     console.error(err)
     errorMessage.value = 'Payment failed. Please try again.'
@@ -77,7 +89,7 @@ const payNow = async () => {
       </div>
 
       <div id="payment-element" class="mb-4">
-        <!-- Stripe will inject the payment form here -->
+        <!-- Stripe injects Payment Element here -->
       </div>
 
       <UButton

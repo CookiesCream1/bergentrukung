@@ -8,7 +8,7 @@ const { signIn } = useAuth()
     @submit.prevent="signIn('google')"
   >
     <button type="submit" class="submit">
-      log in with google
+      Přihlásit Google
     </button>
   </form>
 </template>
