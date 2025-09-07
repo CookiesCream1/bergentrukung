@@ -23,13 +23,15 @@ export default defineNuxtConfig({
     storesDirs: ['./data/**']
   },
 
+  // ---------- Auth Configuration ----------
   auth: {
     isEnabled: true,
     provider: {
       type: 'authjs'
     },
     globalAppMiddleware: {
-      isEnabled: true
+      isEnabled: true,
+      publicRoutes: ['/', '/o-nas', '/kontakt'] // <-- Main page and public sections
     }
   },
 
