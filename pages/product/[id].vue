@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import useCart from '@/data/cart'
 import Topbar from '~/components/Topbar.vue'
@@ -6,7 +7,10 @@ import Topbar from '~/components/Topbar.vue'
 const route = useRoute()
 const cart = useCart()
 
-// Hardcoded product images (no DB images)
+const showNotification = ref(false)
+const addedProductName = ref('')
+
+// Hardcoded product images
 const imageFiles = [
   '1d0877fbfab4d58dbbfe58bf5a54207a',
   '4fb99ce8ab6f6483c176eb30fb627a9c',
@@ -30,14 +34,28 @@ const { data: product, pending, error } = await useAsyncData(
     }
   }
 )
+
+const addToCart = () => {
+  cart.addItem(
+    {
+      product_id: product.value.productId,
+      product_name: product.value.productName,
+      price: product.value.price
+    },
+    1
+  )
+
+  addedProductName.value = product.value.productName
+  showNotification.value = true
+
+  setTimeout(() => (showNotification.value = false), 2000)
+}
 </script>
 
 <template>
   <div class="toplevel bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Topbar -->
     <Topbar class="topbar bg-gray-800 shadow" />
 
-    <!-- Main Content -->
     <main class="main bg-gray-900 p-6">
       <div v-if="pending" class="text-gray-400 text-center py-10">
         Načítám produkt...
@@ -48,7 +66,6 @@ const { data: product, pending, error } = await useAsyncData(
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-        <!-- Left: Product Image -->
         <div class="product-image-wrapper">
           <img
             :src="`/img/${randomImg}.jpg`"
@@ -57,13 +74,11 @@ const { data: product, pending, error } = await useAsyncData(
           >
         </div>
 
-        <!-- Right: Product Info -->
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4 relative">
           <h1 class="text-4xl font-bold text-gray-100">
             {{ product.productName }}
           </h1>
 
-          <!-- Only stars, no numeric value -->
           <div class="flex items-center gap-2">
             <NuxtRating :read-only="true" :rating-value="product.rating" />
           </div>
@@ -72,10 +87,7 @@ const { data: product, pending, error } = await useAsyncData(
             {{ product.description }}
           </p>
 
-          <!-- Price -->
-          <div
-            class="flex items-baseline gap-2 text-3xl font-bold text-gray-100"
-          >
+          <div class="flex items-baseline gap-2 text-3xl font-bold text-gray-100">
             <span>{{ Math.floor(product.price) }}</span>
             <span class="text-xl font-normal">
               .{{ (+product.price).toFixed(2).split(".")[1] }} CZK
@@ -83,21 +95,26 @@ const { data: product, pending, error } = await useAsyncData(
           </div>
 
           <!-- Add to Cart -->
-          <UButton
-            class="mt-4 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
-            @click="
-              cart.addItem(
-                {
-                  product_id: product.productId,
-                  product_name: product.productName,
-                  price: product.price,
-                },
-                1
-              )
-            "
-          >
-            Přidat do košíku
-          </UButton>
+          <div class="relative">
+            <UButton
+              class="mt-4 px-6 py-3 bg-emerald-500 text-white rounded-lg
+                     hover:bg-emerald-600 active:bg-emerald-700 transition-colors duration-150"
+              @click="addToCart"
+            >
+              Přidat do košíku
+            </UButton>
+
+            <!-- Popup notification next to button -->
+            <transition name="fade">
+              <div
+                v-if="showNotification"
+                class="absolute -top-10 left-1/2 transform -translate-x-1/2
+                       bg-emerald-500 text-white px-3 py-1 rounded shadow-md text-sm font-medium"
+              >
+                Položka "{{ addedProductName }}" přidána do košíku!
+              </div>
+            </transition>
+          </div>
 
           <!-- Extra Info -->
           <div class="mt-6 p-4 bg-gray-800 rounded-lg text-gray-300">
@@ -146,10 +163,17 @@ const { data: product, pending, error } = await useAsyncData(
 }
 
 .product-image {
-  max-width: 400px; /* prevent it from being too wide */
+  max-width: 400px;
   height: auto;
   border-radius: 0.5rem;
   object-fit: cover;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
