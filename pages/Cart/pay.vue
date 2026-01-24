@@ -1,114 +1,175 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import useCart from '@/data/cart'
 
-const { getTotal: total, clear } = useCart()
+const { getItems: items, getTotal: total, clear } = useCart()
 const { stripe } = useClientStripe()
 
-let ClientSecret: string | undefined
 const processing = ref(false)
+const loading = ref(true)
 const errorMessage = ref<string | null>(null)
+
 let elements: any = null
+let clientSecret: string | null = null
+let saleId: number | null = null
 
-// Load payment intent + setup Stripe elements
-watch(
-  stripe,
-  async () => {
-    if (stripe.value) {
-      try {
-        const { clientSecret, error } = await $fetch(
-          '/api/public/createPaymentIntent',
-          { query: { amount: Math.floor(total() * 100), currency: 'czk' } }
-        )
+const config = useRuntimeConfig()
+console.log('Stripe PK:', config.public.stripe.publishableKey)
 
-        if (error) {
-          console.error(error)
-          errorMessage.value = error.message ?? 'Failed to create payment intent.'
-          return
-        }
-
-        if (clientSecret) {
-          ClientSecret = clientSecret
-          // Create elements only once
-          elements = stripe.value.elements({ clientSecret })
-          const paymentElement = elements.create('payment')
-          paymentElement.mount('#payment-element')
-        }
-      } catch (err: any) {
-        console.error(err)
-        errorMessage.value = 'Unexpected error while creating payment intent.'
-      }
-    }
-  },
-  { immediate: true }
-)
-
-const payNow = async () => {
-  if (!ClientSecret || !stripe.value || !elements) {
-    errorMessage.value = 'Stripe not ready yet. Try again in a moment.'
-    return
-  }
+onMounted(async () => {
+  if (!stripe.value) { return }
 
   try {
-    processing.value = true
-    errorMessage.value = null
-
-    const result = await stripe.value.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + '/cart/edit'
+    // 1️⃣ Create sale
+    const saleRes = await $fetch('/api/public/checkout', {
+      method: 'POST',
+      body: {
+        total_price: total(),
+        product_arr: items().map(v => ({
+          product_id: v.product_id,
+          price: v.price,
+          count: v.count
+        }))
       }
     })
 
-    if (result.error) {
-      console.error(result.error)
-      errorMessage.value = result.error.message ?? 'Payment failed. Please try again.'
+    saleId = saleRes.saleId
+
+    // 2️⃣ Create PaymentIntent
+    const piRes = await $fetch('/api/public/createPaymentIntent', {
+      method: 'POST',
+      body: {
+        amount: Math.floor(total() * 100),
+        currency: 'czk',
+        saleId
+      }
+    })
+
+    clientSecret = piRes.clientSecret
+    if (!clientSecret) { throw new Error('Missing client secret') }
+
+    // 3️⃣ Stripe Elements (styled & configured)
+    elements = stripe.value.elements({
+      clientSecret,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#2563eb',
+          borderRadius: '8px',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }
+      }
+    })
+
+    const paymentElement = elements.create('payment', {
+      layout: 'tabs', // Card / Apple Pay / Google Pay
+      defaultValues: {
+        billingDetails: {
+          address: { country: 'CZ' }
+        }
+      }
+    })
+
+    paymentElement.mount('#payment-element')
+    loading.value = false
+  } catch (err) {
+    console.error(err)
+    errorMessage.value = 'Nepodařilo se inicializovat platbu.'
+    loading.value = false
+  }
+})
+
+const payNow = async () => {
+  if (!stripe.value || !elements || !clientSecret || !saleId) {
+    errorMessage.value = 'Platba není připravena.'
+    return
+  }
+
+  processing.value = true
+  errorMessage.value = null
+
+  try {
+    const { error } = await stripe.value.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/cart/pay?sale_id=${saleId}`
+      }
+    })
+
+    if (error) {
+      errorMessage.value = error.message ?? 'Platba se nezdařila.'
+      processing.value = false
+      return
     }
+
+    clear()
   } catch (err: any) {
     console.error(err)
-    errorMessage.value = 'Payment failed. Please try again.'
+    errorMessage.value = 'Platba se nezdařila.'
   } finally {
     processing.value = false
   }
 }
+
 </script>
 
 <template>
   <div>
     <Topbar />
 
-    <div class="p-6 max-w-lg mx-auto">
-      <h2 class="text-2xl font-bold mb-4">
-        Platba
+    <div class="max-w-md mx-auto mt-12 bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-2 text-center">
+        Dokončení platby
       </h2>
 
-      <div class="mb-4">
-        <p class="text-lg">
-          Cena: <span class="font-semibold">{{ total() }} CZK</span>
-        </p>
+      <p class="text-center text-gray-600 mb-6">
+        Celkem k zaplacení
+        <span class="font-semibold text-black">
+          {{ total().toFixed(2) }} CZK
+        </span>
+      </p>
+
+      <!-- Loading skeleton -->
+      <div v-if="loading" class="space-y-4 animate-pulse">
+        <div class="h-12 bg-gray-200 rounded" />
+        <div class="h-12 bg-gray-200 rounded" />
+        <div class="h-12 bg-gray-200 rounded" />
       </div>
 
-      <div id="payment-element" class="mb-4">
-        <!-- Stripe injects Payment Element here -->
-      </div>
+      <!-- Stripe Payment Element -->
+      <div
+        v-show="!loading"
+        id="payment-element"
+        class="mb-6"
+      />
 
       <UButton
-        class="px-4 py-2 bg-blue-600 text-white rounded-md"
-        :disabled="processing"
+        block
+        size="lg"
+        color="primary"
+        :loading="processing"
+        :disabled="processing || loading"
         @click="payNow"
       >
-        {{ processing ? 'Processing...' : 'Zaplatit' }}
+        Zaplatit
       </UButton>
 
-      <div v-if="errorMessage" class="text-red-600 mt-3">
+      <p
+        v-if="errorMessage"
+        class="text-red-600 text-sm mt-4 text-center"
+      >
         {{ errorMessage }}
-      </div>
+      </p>
+
+      <p class="text-xs text-gray-400 text-center mt-6">
+        Platba je zabezpečena službou Stripe
+      </p>
     </div>
   </div>
 </template>
 
-<style scoped>
-#payment-element {
-  margin-top: 1rem;
-}
-</style>
+  <style scoped>
+  #payment-element {
+    margin-bottom: 1rem;
+  }
+  </style>

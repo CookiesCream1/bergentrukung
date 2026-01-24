@@ -1,83 +1,105 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-defineProps<{
-  productId: number
-  productName: string
-  description: string
-  price: number
-  rating: number
-}>()
+const props = defineProps<{
+    productId: number
+    productName: string
+    description?: string | null
+    price: number
+    rating: number
+    imageName?: string | null
+    image_name?: string | null
+  }>()
 
-// Hardcoded list of image filenames (from public/img/)
-const imageFiles = [
-  '1d0877fbfab4d58dbbfe58bf5a54207a',
-  '4fb99ce8ab6f6483c176eb30fb627a9c',
-  '5bd6e815c7daf654e118cc82f80be80a',
-  '5f06db0dd6a8067338fbfa3fa6ae6676',
-  '8e494f394f50ee3877c607c90b65312c',
-  '80ba153dab6f568579fbda44d7bf7b78'
-]
+// normalize image name (snake_case OR camelCase)
+const normalizedImageName = computed(() => {
+  return props.imageName || props.image_name || null
+})
 
-const randomImg = imageFiles[Math.floor(Math.random() * imageFiles.length)]
+const imageSrc = computed(() => {
+  if (!normalizedImageName.value) {
+    return '/img/placeholder.jpg'
+  }
+
+  return normalizedImageName.value.endsWith('.jpg')
+    ? `/img/${normalizedImageName.value}`
+    : `/img/${normalizedImageName.value}.jpg`
+})
 </script>
 
 <template>
-  <NuxtLink :to="`/product/${productId}`" class="boundingbox">
+  <NuxtLink
+    :to="`/product/${productId}`"
+    class="boundingbox"
+  >
     <img
-      :src="`/img/${randomImg}.jpg`"
+      :src="imageSrc"
       class="product-image"
       alt="Product image"
+      loading="lazy"
     >
-    <h3 class="mt-2 px-2 text-lg font-semibold text-gray-100">
+
+    <h3 class="mt-2 px-2 text-lg font-semibold text-neutral-100">
       {{ productName }}
     </h3>
+
     <div class="starfix mt-1 px-2">
-      <NuxtRating :read-only="true" :rating-value="rating" />
+      <NuxtRating
+        :read-only="true"
+        :rating-value="rating"
+      />
     </div>
-    <p class="px-2 text-sm text-gray-300 mt-1">
+
+    <p
+      v-if="description"
+      class="px-2 text-sm text-neutral-300 mt-1 line-clamp-3"
+    >
       {{ description }}
     </p>
-    <div class="priceContainer px-2 mt-2">
-      <div style="font-size: 2em; line-height: 2rem;">
+
+    <div class="priceContainer px-2 mt-3">
+      <span class="text-2xl">
         {{ Math.floor(price) }}
-      </div>
-      <div>
-        {{ "." + (+price).toFixed(2).split(".")[1] }}
-      </div>
-      <div>CZK</div>
+      </span>
+      <span class="text-lg">
+        .{{ (+price).toFixed(2).split('.')[1] }}
+      </span>
+      <span class="text-sm">CZK</span>
     </div>
   </NuxtLink>
 </template>
 
-<style scoped>
-.boundingbox {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  background-color: #1f2937;
-  padding: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-}
-.boundingbox:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
+  <style scoped>
+  .boundingbox {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-panel);
+    padding: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
+  }
 
-.product-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 4px;
-}
+  .boundingbox:hover {
+    transform: translateY(-2px);
+    border-color: var(--zamazon-green);
+    box-shadow: 0 8px 20px rgba(74, 222, 128, 0.25);
+  }
 
-.priceContainer {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-weight: bold;
-  margin-top: 0.5rem;
-}
-</style>
+  .product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #111;
+  }
+
+  .priceContainer {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-weight: bold;
+    color: var(--zamazon-green);
+  }
+  </style>

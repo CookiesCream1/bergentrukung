@@ -7,13 +7,12 @@ definePageMeta({
   auth: false
 })
 
-// SEARCH state
 const search = ref('')
 
-// Fetch products only (no categories anymore)
-const { data: productsData, pending: productsPending, error: productsError } = useFetch('/api/public/products', { initialCache: false })
+// Fetch products only
+const { data: productsData, pending: productsPending, error: productsError } =
+  useFetch('/api/public/products', { initialCache: false })
 
-// Computed reactive filtered products
 const filteredProducts = computed(() => {
   const products = productsData.value ?? []
   if (!search.value) { return products }
@@ -21,117 +20,130 @@ const filteredProducts = computed(() => {
     product?.productName?.toLowerCase().includes(search.value.toLowerCase())
   )
 })
+
+console.log(products.value)
 </script>
 
 <template>
-  <body>
-    <div class="toplevel bg-gray-900 text-gray-100">
-      <!-- Topbar -->
-      <Topbar v-model="search" class="topbar bg-gray-800 shadow" />
-
-      <!-- Sidebar replaced with Adspace -->
-      <aside class="sidebar bg-gray-900 border-r border-gray-700 flex items-center justify-center">
-        <div class="adbox bg-gray-800 rounded-lg shadow p-4 text-center">
-          <p class="text-gray-400 text-sm">
-            Reklamní prostor
-          </p>
-          <div class="h-48 w-32 bg-gray-700 mt-2 rounded flex items-center justify-center text-xs text-gray-500">
-            Banner 600
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main -->
-      <main class="main bg-gray-900">
-        <template v-if="productsPending">
-          <p class="text-gray-400">
-            Načítám produkty...
-          </p>
-        </template>
-        <template v-else-if="productsError">
-          <p class="text-red-400">
-            Nepodařilo se načíst produkty.
-          </p>
-        </template>
-        <template v-else-if="(filteredProducts?.length ?? 0) === 0">
-          <p class="text-gray-400">
-            Žádné produkty nebyly nalezeny.
-          </p>
-        </template>
-        <template v-else>
-          <ProductSquare
-            v-for="product in filteredProducts"
-            :key="product?.productId || product?.name"
-            v-bind="product"
-            class="bg-gray-800 text-gray-100 rounded-lg shadow hover:shadow-lg transition"
-          />
-        </template>
-      </main>
+  <div class="toplevel">
+    <!-- Topbar -->
+    <div class="topbar-area">
+      <Topbar v-model="search" />
     </div>
-  </body>
-</template>
-<style scoped>
 
+    <!-- Sidebar Ads -->
+    <aside class="sidebar">
+      <div class="adbox">
+        <p class="text-gray-400 text-sm">
+          Reklamní prostor
+        </p>
+        <div class="adbanner">
+          Banner 600
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Product Grid -->
+    <main class="main">
+      <template v-if="productsPending">
+        <p class="loading">
+          Načítám produkty...
+        </p>
+      </template>
+
+      <template v-else-if="productsError">
+        <p class="error">
+          Nepodařilo se načíst produkty.
+        </p>
+      </template>
+
+      <template v-else-if="(filteredProducts?.length ?? 0) === 0">
+        <p class="empty">
+          Žádné produkty nebyly nalezeny.
+        </p>
+      </template>
+
+      <template v-else>
+        <ProductSquare
+          v-for="p in filteredProducts"
+          :key="p.productId"
+          v-bind="p"
+        />
+      </template>
+    </main>
+  </div>
+</template>
+
+<style scoped>
+/* OVERALL GRID */
 .toplevel {
+  height: 100%;
   display: grid;
-  grid-template-columns: 1fr 4fr;
+  grid-template-columns: 16rem 1fr;
   grid-template-rows: auto 1fr;
+
   grid-template-areas:
     "topbar topbar"
     "sidebar main";
+
   gap: 1rem;
 
-  background-color: #111827; /* single full dark background */
-  color: #f3f4f6; /* text color */
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  padding: 0; /* no random body padding */
 }
 
-.topbar {
+/* AREA MAPPING */
+.topbar-area {
   grid-area: topbar;
 }
 
 .sidebar {
   grid-area: sidebar;
   padding: 1rem;
-  width: 16rem;
-  overflow-y: auto;
-  /* no background here */
+  border-right: 1px solid var(--border);
 }
 
 .main {
   grid-area: main;
   padding: 1rem;
+
   display: grid;
   gap: 1.5rem;
+
+  /* Responsive product grid */
   grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
-  justify-content: start;
-  /* no background here */
 }
 
-/* Product cards */
-.main > * {
-  width: 256px;
-  height: 400px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid #374151;
-  background-color: #1f2937; /* only cards have dark box */
+/* ADS */
+.adbox {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.main > *:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  padding: 1rem;
+  text-align: center;
 }
 
-.main > * img {
-  object-fit: cover;
-  width: 100%;
+.adbanner {
+  margin-top: 1rem;
   height: 200px;
-  border-radius: 0.375rem;
+  width: 100%;
+  background: var(--bg-deeper);
+  border-radius: 0.5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
 }
-.body{
- background-color: #1f2937;
+
+/* States */
+.loading,
+.error,
+.empty {
+  color: var(--text-secondary);
+}
+.error {
+  color: #f87171;
 }
 </style>

@@ -1,9 +1,14 @@
 import { createConnection } from 'mariadb'
 
 export const useDbClient = async () => {
-  const { mariadb } = useRuntimeConfig()
+  const conn = await createConnection({
+    host: '127.0.0.1',
+    port: 3307,
+    user: 'pospislu20',
+    password: 'pymyjipijema',
+    database: 'pospislu20_1',
+    connectTimeout: 10000
+  })
 
-  const conn = await createConnection({ ...mariadb, port: +mariadb.port, connectTimeout: 100000 })
-  conn.query('use railway')
   return conn
 }

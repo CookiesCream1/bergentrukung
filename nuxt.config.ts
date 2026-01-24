@@ -1,12 +1,8 @@
-// nuxt.config.ts
-import { defineNuxtConfig } from 'nuxt/config' // <<--- must import this
+import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
   devtools: {
-    enabled: true,
-    timeline: {
-      enabled: true
-    }
+    enabled: true
   },
 
   modules: [
@@ -23,7 +19,6 @@ export default defineNuxtConfig({
     storesDirs: ['./data/**']
   },
 
-  // ---------- Auth Configuration ----------
   auth: {
     isEnabled: true,
     provider: {
@@ -31,7 +26,7 @@ export default defineNuxtConfig({
     },
     globalAppMiddleware: {
       isEnabled: true,
-      publicRoutes: ['/', '/o-nas', '/kontakt'] // <-- Main page and public sections
+      publicRoutes: ['/', '/o-nas', '/kontakt']
     }
   },
 
@@ -39,29 +34,32 @@ export default defineNuxtConfig({
     fix: true
   },
 
+  // ✅ STRIPE (correctly closed)
   stripe: {
     server: {
-      key: process.env.STRIPE_SECRET_KEY,
-      options: {}
+      key: process.env.STRIPE_SECRET_KEY
     },
     client: {
-      key: process.env.STRIPE_PUBLIC_KEY,
-      options: {}
+      key: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     }
   },
 
+  // ✅ RUNTIME CONFIG
   runtimeConfig: {
     mariadb: {
-      host: process.env.db_host ?? (() => { throw new Error('db_host is undefined') })(),
-      user: process.env.db_user ?? (() => { throw new Error('db_user is undefined') })(),
-      password: process.env.db_pwd ?? (() => { throw new Error('db_pwd is undefined') })(),
-      port: Number(process.env.MYSQLPORT) ?? (() => { throw new Error('MYSQLPORT is undefined') })()
+      host: process.env.db_host,
+      user: process.env.db_user,
+      password: process.env.db_pwd,
+      port: Number(process.env.MYSQLPORT),
+      database: process.env.DB_DATABASE // 👈 THIS WAS MISSING
     },
+
     public: {
       stripe: {
-        key: process.env.STRIPE_PUBLIC_KEY
+        key: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
       }
     },
+
     mail: {
       host: 'smtp.gmail.com',
       port: 587,
@@ -69,9 +67,6 @@ export default defineNuxtConfig({
       auth: {
         user: 'luky.pospa04@gmail.com',
         pass: 'gmuo irzh ydlq jmah'
-      },
-      tls: {
-        ciphers: 'SSLv3'
       }
     }
   },
