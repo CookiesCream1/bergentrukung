@@ -1,7 +1,7 @@
-import { createConnection } from 'mariadb'
-
 export const useDbClient = async () => {
-  const conn = await createConnection({
+  const mariadb = await import('mariadb')
+
+  const conn = await mariadb.createConnection({
     host: '127.0.0.1',
     port: 3307,
     user: 'pospislu20',

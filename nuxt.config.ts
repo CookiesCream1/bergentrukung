@@ -34,7 +34,15 @@ export default defineNuxtConfig({
     fix: true
   },
 
-  // ✅ STRIPE (correctly closed)
+  // ✅ ADD THIS BLOCK
+  nitro: {
+    preset: 'node-server',
+    externals: {
+      external: ['mariadb']
+    }
+  },
+
+  // ✅ STRIPE
   stripe: {
     server: {
       key: process.env.STRIPE_SECRET_KEY
@@ -51,7 +59,7 @@ export default defineNuxtConfig({
       user: process.env.db_user,
       password: process.env.db_pwd,
       port: Number(process.env.MYSQLPORT),
-      database: process.env.DB_DATABASE // 👈 THIS WAS MISSING
+      database: process.env.DB_DATABASE
     },
 
     public: {
