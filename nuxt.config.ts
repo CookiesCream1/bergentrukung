@@ -10,10 +10,13 @@ export default defineNuxtConfig({
     'nuxt-rating',
     '@nuxtjs/eslint-module',
     '@nuxt/image',
+    '@nuxtjs/tailwindcss',
     '@nuxt/ui',
     '@sidebase/nuxt-auth',
     '@unlok-co/nuxt-stripe'
   ],
+
+  css: ['~/assets/css/main.css'],
 
   pinia: {
     storesDirs: ['./data/**']
@@ -24,10 +27,7 @@ export default defineNuxtConfig({
     provider: {
       type: 'authjs'
     },
-    globalAppMiddleware: {
-      isEnabled: true,
-      publicRoutes: ['/', '/o-nas', '/kontakt']
-    }
+    globalAppMiddleware: true
   },
 
   eslint: {

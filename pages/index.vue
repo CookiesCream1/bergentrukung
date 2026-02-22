@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+definePageMeta({
+  auth: false
+})
 
 // Auth state
 const user = useAuthState()
-const { data: role } = await useFetch('/api/user/role')
 const { signOut } = useAuth()
 
 // Props & emits
 defineProps<{ modelValue: string }>()
-const emit = defineEmits<{
-  (event: 'update:modelValue', value: string): void
-}>()
+const emit = defineEmits<{(event: 'update:modelValue', value: string): void}>()
 
 // Search state
 const searchInput = ref('')
@@ -18,9 +18,6 @@ watch(searchInput, val => emit('update:modelValue', val))
 
 // Dropdown state
 const demoOpen = ref(false)
-function toggleDemo () {
-  demoOpen.value = !demoOpen.value
-}
 
 // Click outside handler
 function handleClickOutside (e: MouseEvent) {
@@ -35,10 +32,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
-})
-
-definePageMeta({
-  auth: false
 })
 </script>
 

@@ -11,7 +11,7 @@ const search = ref('')
 
 // Fetch products only
 const { data: productsData, pending: productsPending, error: productsError } =
-  useFetch('/api/public/products', { initialCache: false })
+  useFetch('/api/public/products')
 
 const filteredProducts = computed(() => {
   const products = productsData.value ?? []
@@ -20,8 +20,6 @@ const filteredProducts = computed(() => {
     product?.productName?.toLowerCase().includes(search.value.toLowerCase())
   )
 })
-
-console.log(products.value)
 </script>
 
 <template>

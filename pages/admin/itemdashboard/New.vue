@@ -2,7 +2,7 @@
 import Topbar from '@/components/Topbar.vue'
 import type { FormSubmitEvent } from '#ui/types'
 definePageMeta({
-  middleware: ['admin', 'auth']
+  middleware: ['admin']
 })
 
 const state = reactive({
