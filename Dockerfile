@@ -1,4 +1,4 @@
-FROM node:20-alpine as builder
+FROM node:24-alpine3.22 as builder
 
 WORKDIR /app
 
@@ -7,11 +7,11 @@ COPY package-lock.json /app/
 
 RUN npm ci && npm cache clean --force
 
-ADD . /app
+COPY . /app
 
 RUN npm run build
 
-FROM node:20-alpine
+FROM node:24-alpine3.22
 
 WORKDIR /app
 

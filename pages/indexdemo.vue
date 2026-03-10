@@ -20,8 +20,8 @@ definePageMeta({
         </nav>
       </div>
     </header>
-    <body>
-      <img src="public\img\indexdemoalt.jpg" width="95%" style="padding-left: 5%;"></img>
+    <main>
+      <img src="/img/indexdemoalt.jpg" width="95%" style="padding-left: 5%;">
       <section class="bg-emerald-100 py-20 text-center">
         <h2 class="text-4xl font-bold mb-4">
           Váš nový styl začíná zde
@@ -63,7 +63,7 @@ definePageMeta({
           info@zamazon.cz
         </a>
       </section>
-    </body>
+    </main>
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-6 text-center">
       <p>&copy; 2025 Zamazon. Všechna práva vyhrazena.</p>

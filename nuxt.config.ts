@@ -6,11 +6,9 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '@nuxt/eslint',
     '@pinia/nuxt',
-    'nuxt-rating',
-    '@nuxtjs/eslint-module',
     '@nuxt/image',
-    '@nuxtjs/tailwindcss',
     '@nuxt/ui',
     '@sidebase/nuxt-auth',
     '@unlok-co/nuxt-stripe'

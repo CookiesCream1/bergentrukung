@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import { defineEventHandler, getRequestURL, readBody } from 'h3'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'

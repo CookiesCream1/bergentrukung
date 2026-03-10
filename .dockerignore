@@ -1,0 +1,17 @@
+node_modules
+.nuxt
+.nuxt.stale-*
+.output
+.data
+.nitro
+.cache
+dist
+logs
+*.log
+.DS_Store
+.fleet
+.idea
+.git
+.env
+.env.*
+!.env.example
