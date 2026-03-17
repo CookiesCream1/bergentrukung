@@ -1,86 +1,37 @@
-# Nuxt 3 Minimal Starter
+# Bergentrukung
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Nuxt 4 storefront using `@sidebase/nuxt-auth` with the local provider.
 
 ## Setup
 
-Make sure to install the dependencies:
+Install dependencies:
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+Create an `.env` file from `.env template` and fill in the database, Stripe, and auth values.
 
-Start the development server on `http://localhost:3000`:
+## Auth
+
+Authentication is email/password based and backed by the local Nuxt API:
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `POST /api/auth/logout`
+- `GET /api/auth/session`
+
+Passwords are stored in `users.pwd_hash`. Sessions are represented by signed bearer tokens generated from `auth_secret`.
+
+## Development
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
 ## Production
 
-Build the application for production:
-
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-"# ZAMAZON.worksnow" 
-"# zamazonpain" 
-"# zamazonpain" 
-"# zamazonfinish" 
-"# zamazonfinish" 
-"# zamazonfinish" 
-"# zamazonfinish" 
-"# dickeries" 
-"# dickeries" 
-"# bergentrukung" 
-"# bergentrukung" 

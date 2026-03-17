@@ -13,23 +13,9 @@ definePageMeta({
     <div class="login-wrapper">
       <div class="login-card fade-in">
         <h2 class="login-title">
-          Vítejte zpět
+          Prihlaseni
         </h2>
-
-        <!-- Default login component -->
         <Login />
-
-        <div class="divider">
-          <span>nebo</span>
-        </div>
-
-        <!-- Manual login link -->
-        <div class="manual-login-link">
-          <p>Nemáte Google účet?</p>
-          <button @click="$router.push('/manual-login')">
-            Ruční přihlášení
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -83,51 +69,6 @@ definePageMeta({
   color: #fafafa;
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 1.5rem 0;
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 0.75rem;
-}
-
-.manual-login-link {
-  text-align: center;
-}
-
-.manual-login-link p {
-  color: #aaa;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.manual-login-link button {
-  background: linear-gradient(90deg, #6b46c1, #55349d);
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  cursor: pointer;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-.manual-login-link button:hover {
-  background: linear-gradient(90deg, #7a57d1, #6441b5);
-  transform: translateY(-2px);
 }
 
 .fade-in {

@@ -61,7 +61,7 @@ onBeforeUnmount(() => {
           </div>
           <div v-else>
             <button class="user-btn" @click="signOut()">
-              {{ user.data.value?.user?.name ?? "No Name" }}
+              {{ user.data.value?.name ?? user.data.value?.email ?? "No Name" }}
             </button>
           </div>
         </div>

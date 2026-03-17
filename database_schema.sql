@@ -131,7 +131,8 @@ CREATE TABLE `users` (
   `user_id` varchar(255) NOT NULL,
   `user_role` int(11) NOT NULL DEFAULT 5,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `email` varchar(50) NOT NULL
+  `email` varchar(50) NOT NULL,
+  `pwd_hash` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -192,6 +193,7 @@ ALTER TABLE `sale_status`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`) USING BTREE,
+  ADD UNIQUE KEY `email` (`email`) USING BTREE,
   ADD KEY `FK_UserRole` (`user_role`) USING BTREE;
 
 --

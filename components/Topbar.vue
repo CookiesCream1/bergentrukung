@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const user = useAuthState()
-const { data: role } = await useFetch('/api/user/role')
 const { signOut } = useAuth()
+const role = computed(() => user.data.value?.role)
 
 defineProps({ modelValue: String })
 const emit = defineEmits(['update:modelValue'])
@@ -40,7 +40,7 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
         id="search"
         v-model="searchInput"
         type="text"
-        placeholder="🔍  Vyhledávej produkty..."
+        placeholder="Vyhledavej produkty..."
       >
     </div>
 
@@ -87,31 +87,31 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
               class="dropdown-item"
               @click="demoOpen = false"
             >
-              Demo stránka
+              Demo stranka
             </NuxtLink>
             <NuxtLink
               to="/indexdemonight"
               class="dropdown-item"
               @click="demoOpen = false"
             >
-              Demo stránka (Nightmode)
+              Demo stranka (Nightmode)
             </NuxtLink>
           </div>
         </transition>
       </div>
 
       <NuxtLink to="/cart" class="link">
-        Košík
+        Kosik
       </NuxtLink>
 
       <template v-if="user.status.value !== 'authenticated'">
         <NuxtLink to="/login" class="link">
-          Přihlásit
+          Prihlasit
         </NuxtLink>
       </template>
       <template v-else>
         <button class="user-btn" @click="signOut()">
-          {{ user.data.value?.user?.name ?? "Uživatel" }}
+          {{ user.data.value?.name ?? user.data.value?.email ?? "Uzivatel" }}
         </button>
       </template>
     </div>
@@ -131,26 +131,25 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
   color: var(--text-main);
 }
 
-/* LOGO */
 .logo-text {
   font-weight: 700;
   font-size: 1.4rem;
-  color: var(--zamazon-green, #4ade80); /* fallback so it can't be white */
+  color: var(--zamazon-green, #4ade80);
   text-decoration: none;
   letter-spacing: 0.5px;
   transition: color 0.25s ease, text-shadow 0.25s ease;
 }
+
 .logo-text:hover {
   color: var(--zamazon-green-glow, #86efac);
   text-shadow: 0 0 8px rgba(74,222,128,0.5);
 }
 
-/* RESPONSIVE SEARCH WRAPPER */
 .search-wrapper {
-  flex: 1;                         /* lets center section expand */
+  flex: 1;
   display: flex;
-  justify-content: center;         /* centers input perfectly */
-  padding: 0 1.5rem;               /* prevents hugging the edges */
+  justify-content: center;
+  padding: 0 1.5rem;
 }
 
 input#search {
@@ -159,11 +158,9 @@ input#search {
   color: var(--text-main);
   padding: 0.55rem 1rem;
   border-radius: 0.5rem;
-
   width: 100%;
-  max-width: 600px;                /* responsive upper limit */
-  min-width: 200px;                /* don’t shrink too far */
-
+  max-width: 600px;
+  min-width: 200px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -173,14 +170,12 @@ input#search:focus {
   box-shadow: 0 0 0 2px rgba(74,222,128,0.2);
 }
 
-/* NAV LINKS WRAPPER */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 1.25rem;
 }
 
-/* navigation links */
 .nav-links .link {
   padding: 0.45rem 0.9rem;
   border-radius: 0.45rem;
@@ -194,7 +189,6 @@ input#search:focus {
   text-shadow: 0 0 6px rgba(74,222,128,0.4);
 }
 
-/* USER BUTTON */
 .user-btn {
   padding: 0.45rem 0.9rem;
   border-radius: 0.45rem;
@@ -203,9 +197,9 @@ input#search:focus {
   color: var(--text-main);
   transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .user-btn:hover {
   background: rgba(74, 222, 128, 0.18);
   box-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
 }
-
 </style>

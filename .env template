@@ -1,0 +1,9 @@
+auth_secret=replace_me_with_a_long_random_secret
+AUTH_TOKEN_MAX_AGE=604800
+DB_DATABASE=zamazon
+db_host=127.0.0.1
+db_user=root
+db_pwd=toor
+MYSQLPORT=3306
+NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=replace_me
+STRIPE_SECRET_KEY=replace_me

@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { getServerSession } from '#auth'
 import { useDbClient } from '~/composables/useDbClient'
+import { requireAuthUser } from '~/server/utils/auth'
 
 const validator = z.object({
   saleId: z.number().positive(),
@@ -9,13 +9,7 @@ const validator = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getServerSession(event)
-  // @ts-expect-error
-  const userId = session?.user?.id
-  if (userId === undefined) {
-    setResponseStatus(event, 400, 'User not authenticated')
-    return
-  }
+  const user = await requireAuthUser(event)
 
   const body = validator.safeParse(await readBody(event))
   if (!body.success) {
@@ -31,7 +25,7 @@ export default defineEventHandler(async (event) => {
     // Check if the sale belongs to the user and is in a pending status
     const [saleResult]: [{ sale_id: number, user_id: string, sale_date: Date, total_amount: number, sale_status: number }?] = await db.query(
       'SELECT * FROM sales WHERE sale_id = ? AND user_id = ? AND sale_status = (SELECT id FROM sale_status WHERE status = "pending")',
-      [saleId, userId]
+      [saleId, user.id]
     )
 
     if (!saleResult) {

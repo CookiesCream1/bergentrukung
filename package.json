@@ -16,7 +16,6 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "mariadb": "^3.5.1",
-    "next-auth": "~4.21.1",
     "nodemailer": "^6.10.1",
     "nuxt-stripe-module": "^3.2.0",
     "pinia": "^3.0.4",

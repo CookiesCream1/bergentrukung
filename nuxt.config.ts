@@ -22,8 +22,32 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
+    baseURL: '/api/auth',
     provider: {
-      type: 'authjs'
+      type: 'local',
+      pages: {
+        login: '/login'
+      },
+      endpoints: {
+        signIn: { path: '/login', method: 'post' },
+        signUp: { path: '/register', method: 'post' },
+        signOut: { path: '/logout', method: 'post' },
+        getSession: { path: '/session', method: 'get' }
+      },
+      token: {
+        signInResponseTokenPointer: '/token',
+        maxAgeInSeconds: Number(process.env.AUTH_TOKEN_MAX_AGE ?? 60 * 60 * 24 * 7),
+        sameSiteAttribute: 'lax',
+        secureCookieAttribute: process.env.NODE_ENV === 'production'
+      },
+      session: {
+        dataType: {
+          id: 'string',
+          email: 'string',
+          name: 'string',
+          role: 'string'
+        }
+      }
     },
     globalAppMiddleware: true
   },
@@ -52,6 +76,8 @@ export default defineNuxtConfig({
 
   // ✅ RUNTIME CONFIG
   runtimeConfig: {
+    authSecret: process.env.auth_secret,
+    authTokenMaxAgeInSeconds: Number(process.env.AUTH_TOKEN_MAX_AGE ?? 60 * 60 * 24 * 7),
     mariadb: {
       host: process.env.db_host,
       user: process.env.db_user,

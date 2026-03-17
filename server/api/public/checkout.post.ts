@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { getServerSession } from '#auth'
 import { useDbClient } from '~/composables/useDbClient'
+import { requireAuthUser } from '~/server/utils/auth'
 
 const validator = z.object({
   total_price: z.number().positive(),
@@ -14,14 +14,7 @@ const validator = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getServerSession(event)
-  // @ts-expect-error
-  const uid = session?.user?.id
-
-  if (!uid) {
-    setResponseStatus(event, 401, 'User not authenticated')
-    return
-  }
+  const user = await requireAuthUser(event)
 
   const parsed = validator.safeParse(await readBody(event))
   if (!parsed.success) {
@@ -48,7 +41,7 @@ export default defineEventHandler(async (event) => {
     const saleResult = await db.query(
       `INSERT INTO sales (user_id, total_amount, sale_status)
        VALUES (?, ?, ?)`,
-      [uid, body.total_price, pendingStatusId]
+      [user.id, body.total_price, pendingStatusId]
     ) as { insertId: number }
 
     const saleId = saleResult.insertId
